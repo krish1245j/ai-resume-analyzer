@@ -4,6 +4,7 @@ import connectDb from "./db/db.js";
 import genrateInterviewReport from './src/services/ai.services.js';
 import sampleData from "./src/services/test.js"
 
+
 console.log(process.env.GEMINI_API_KEY)
 connectDb();
 genrateInterviewReport({

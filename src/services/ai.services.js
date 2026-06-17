@@ -77,7 +77,7 @@ Job Description:
 ${jobDescription}
 `;
   const response=await ai.models.generateContent({
-    model:"gemini-3-flash-preview",
+    model:"gemini-2.5-flash",
     contents:prompt,
     config:{
       responseMimeType:"application/json",
@@ -85,7 +85,7 @@ ${jobDescription}
     }
   })
 
-  console.log(response.text)
+  return JSON.parse(response.text);
 
 }
 

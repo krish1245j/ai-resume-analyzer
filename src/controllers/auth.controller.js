@@ -88,10 +88,10 @@ async function logoutUser(req, res) {
 async function getMe(req, res) {
     const user = await userModel.findById(req.user.id);
     return res.status(201).json({
-        id: user._id,
-        username: user.username,
+        id: user._id, 
+        username: user.username, 
         email: user.email,
     })
 
 }
-export default { registerUser, loginUser, logoutUser, getMe }
+export default { registerUser, loginUser, logoutUser, getMe } 

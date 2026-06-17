@@ -33,7 +33,7 @@ const sampleData = {
   - Good understanding of backend architecture
   - Quick learner
   `,
-
+ 
   selfDescription: `
   I am a BCA student passionate about backend development. I enjoy building real-world projects like authentication systems and APIs. 
   I am currently improving my DSA and learning advanced backend concepts. 
