@@ -9,10 +9,11 @@ const app = express();
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://ai-resume-analyzer-delta-coral.vercel.app"
+    "https://ai-resume-analyzer-delta-coral.vercel.app",
+     "http://localhost:5174"
   ],
   credentials: true
-}));
+})); 
 
 app.use(cookieParser());
 app.use(express.json());
@@ -20,4 +21,4 @@ app.use(express.json());
 app.use("/api/auth", authRouter);
 app.use("/api/interview", interviewRouter);
 
-export default app;
+export default app; 

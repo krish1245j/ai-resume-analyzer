@@ -85,8 +85,8 @@ ${jobDescription}
     }
   })
 
-  return JSON.parse(response.text);
+  return interviewReportSchema.parse(JSON.parse(response.text));
 
 }
 
-export default genrateInterviewReport;
+export default genrateInterviewReport; 
