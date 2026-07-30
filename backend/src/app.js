@@ -17,13 +17,15 @@ app.use(cors({
 
 app.use(cookieParser());
 app.use(express.json());
-
 app.get("/", (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: "Backend is working!",
-    });
+    res.send("Backend v2 deployed 🚀");
 });
+// app.get("/", (req, res) => {
+//     res.status(200).json({
+//         success: true,
+//         message: "Backend is working!",
+//     });
+// });
 app.use("/api/auth", authRouter);
 app.use("/api/interview", interviewRouter);
 
