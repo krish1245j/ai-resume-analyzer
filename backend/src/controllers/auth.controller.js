@@ -28,7 +28,11 @@ async function registerUser(req, res) {
             { id: user._id, username: user.username, createdAt: Date.now() }, process.env.JWT_SECRET,
             { expiresIn: "1d" }
         )
-        res.cookie("token", token);
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none"
+        });
         return res.status(201).json({
             message: "User created sucessfully",
             user: {
@@ -70,7 +74,11 @@ async function loginUser(req, res) {
             { id: user._id, username: user.username }, process.env.JWT_SECRET,
             { expiresIn: "1d" }
         )
-        res.cookie("token", token);
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none"
+        });
         return res.status(201).json({
             message: "User LoggedIn sucessfully",
             user: {
