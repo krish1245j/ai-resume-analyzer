@@ -1,3 +1,4 @@
+import reportsModel from "../models/reports.model.js";
 import genrateInterviewReport from "../services/ai.services.js";
 
 async function createInterviewReport(req, res) {
@@ -15,7 +16,12 @@ async function createInterviewReport(req, res) {
       selfDescription,
       jobDescription,
     });
-
+    console.log(report)
+    await reportsModel.create({
+      user:req.user.id,
+      response:report
+    })
+    
     return res.status(200).json(report);
   } catch (error) {
     console.log(error);
@@ -26,6 +32,40 @@ async function createInterviewReport(req, res) {
   }
 }
 
+async function getAllReports(req,res) {
+  const user=req.user.id;
+  const reports=await reportsModel.find({
+    user:user
+  })
+  return res.status(200).json({
+    message:"Reports found sucessfully",
+    reports
+  })
+}
+
+async function getReport(req,res) {
+  const id=req.params.id;
+  const user=req.user.id;
+  if(!id){
+    return res.status(404).json({
+      message:"Id is required"
+    })
+  }
+  const report=await reportsModel.findOne({
+    _id:id,
+    user:user
+  })
+  if(!report){
+    return res.status(404).json({
+      message:"Report Not Found"
+    })
+  }
+  return res.status(200).json({
+    message:"Report found sucessfully",
+    report
+  })
+}
+
 export default {
-  createInterviewReport,
+  createInterviewReport,getAllReports,getReport
 };

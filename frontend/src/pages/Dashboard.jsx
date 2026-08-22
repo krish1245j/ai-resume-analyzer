@@ -1,24 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import API from "../api/axios";
-import {
-  FiFileText,
-  FiUser,
-  FiBriefcase,
-  FiZap,
-  FiCode,
-  FiUsers,
-  FiAlertOctagon,
-  FiCalendar,
-} from "react-icons/fi";
+import { FiFileText, FiUser, FiBriefcase, FiZap, FiClock } from "react-icons/fi";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import Card from "../components/ui/Card";
 import Textarea from "../components/ui/Textarea";
 import Button from "../components/ui/Button";
 import SectionTitle from "../components/shared/SectionTitle";
-import MatchScoreCard from "../components/report/MatchScoreCard";
-import QuestionCard from "../components/report/QuestionCard";
-import SkillGapCard from "../components/report/SkillGapCard";
-import PreparationTimeline from "../components/report/PreparationTimeline";
+import ReportView from "../components/report/ReportView";
+import ReportHistory from "../components/report/ReportHistory";
 import ReportSkeleton from "../components/report/ReportSkeleton";
 
 function Dashboard() {
@@ -30,8 +19,27 @@ function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
 
+  const [history, setHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+
   const reportRef = useRef(null);
   const stepInterval = useRef(null);
+
+  async function fetchHistory() {
+    try {
+      setHistoryLoading(true);
+      const res = await API.get("/interview");
+      setHistory(res.data.reports || []);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
 
   useEffect(() => {
     if (loading) {
@@ -63,6 +71,7 @@ function Dashboard() {
       });
 
       setReport(res.data);
+      fetchHistory();
     } catch (error) {
       console.log(error);
       alert("Failed to generate report");
@@ -148,6 +157,19 @@ function Dashboard() {
         )}
       </section>
 
+      {/* Past reports */}
+      <section className="mt-10">
+        <SectionTitle
+          eyebrow="History"
+          icon={FiClock}
+          title="Past reports"
+          description="Reopen a report you generated earlier."
+        />
+        <div className="mt-6">
+          <ReportHistory reports={history} loading={historyLoading} />
+        </div>
+      </section>
+
       {/* Loading state */}
       {loading && (
         <section className="mt-14">
@@ -157,82 +179,8 @@ function Dashboard() {
 
       {/* Report */}
       {report && !loading && (
-        <div ref={reportRef} className="mt-16 space-y-16 scroll-mt-24">
-          <MatchScoreCard score={report.matchScore} />
-
-          {Array.isArray(report.technicalQuestions) && report.technicalQuestions.length > 0 && (
-            <section>
-              <SectionTitle
-                eyebrow="Prep"
-                icon={FiCode}
-                title="Technical questions"
-                description="What an interviewer is likely to ask about how you build things."
-              />
-              <div className="mt-6 space-y-3">
-                {report.technicalQuestions.map((q, i) => (
-                  <QuestionCard
-                    key={i}
-                    index={i}
-                    question={q.question}
-                    intention={q.intention}
-                    answer={q.answer}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {Array.isArray(report.behavioralQuestions) && report.behavioralQuestions.length > 0 && (
-            <section>
-              <SectionTitle
-                eyebrow="Prep"
-                icon={FiUsers}
-                title="Behavioral questions"
-                description="How you've handled real situations — and how to talk about them."
-              />
-              <div className="mt-6 space-y-3">
-                {report.behavioralQuestions.map((q, i) => (
-                  <QuestionCard
-                    key={i}
-                    index={i}
-                    question={q.question}
-                    intention={q.intention}
-                    answer={q.answer}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {Array.isArray(report.skillGaps) && report.skillGaps.length > 0 && (
-            <section>
-              <SectionTitle
-                eyebrow="Gaps"
-                icon={FiAlertOctagon}
-                title="Skill gaps"
-                description="Areas the job description expects that your background doesn't fully cover yet."
-              />
-              <div className="mt-6 flex flex-wrap gap-3">
-                {report.skillGaps.map((gap, i) => (
-                  <SkillGapCard key={i} skill={gap.skill} severity={gap.severity} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {Array.isArray(report.preparationPlan) && report.preparationPlan.length > 0 && (
-            <section>
-              <SectionTitle
-                eyebrow="Plan"
-                icon={FiCalendar}
-                title="Preparation plan"
-                description="A day-by-day path to closing the gaps above before your interview."
-              />
-              <div className="mt-6">
-                <PreparationTimeline days={report.preparationPlan} />
-              </div>
-            </section>
-          )}
+        <div ref={reportRef} className="mt-16 scroll-mt-24">
+          <ReportView report={report} />
         </div>
       )}
     </DashboardLayout>
