@@ -1,4 +1,4 @@
-# AI Resume Analyzer
+# PerpForge ( AI Resume Analyzer )
 
 AI-powered resume analysis platform that evaluates resumes, identifies skill gaps, and provides personalized improvement suggestions using Generative AI.
 
