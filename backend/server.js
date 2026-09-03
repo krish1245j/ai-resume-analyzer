@@ -2,8 +2,6 @@ import 'dotenv/config';
 import app from "./src/app.js"
 import connectDb from "./db/db.js";
 
-
-console.log(process.env.GEMINI_API_KEY)
 connectDb();
 // genrateInterviewReport({
 //   resume: sampleData.resume,

@@ -36,7 +36,7 @@ async function getAllReports(req,res) {
   const user=req.user.id;
   const reports=await reportsModel.find({
     user:user
-  })
+  }).sort({ createdAt: -1 })
   return res.status(200).json({
     message:"Reports found sucessfully",
     reports
