@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import API from "../api/axios";
-import { FiFileText, FiUser, FiBriefcase, FiZap, FiClock } from "react-icons/fi";
+import { FiUser, FiBriefcase, FiZap, FiClock } from "react-icons/fi";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import Card from "../components/ui/Card";
 import Textarea from "../components/ui/Textarea";
+import ResumeInput from "../components/ui/Resumeinput";
 import Button from "../components/ui/Button";
 import SectionTitle from "../components/shared/SectionTitle";
 import ReportView from "../components/report/ReportView";
@@ -12,6 +13,8 @@ import ReportSkeleton from "../components/report/ReportSkeleton";
 
 function Dashboard() {
   const [resume, setResume] = useState("");
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeError, setResumeError] = useState("");
   const [selfDescription, setSelfDescription] = useState("");
   const [jobDescription, setJobDescription] = useState("");
 
@@ -64,17 +67,36 @@ function Dashboard() {
       setLoading(true);
       setReport(null);
 
-      const res = await API.post("/interview/generate", {
-        resume,
-        selfDescription,
-        jobDescription,
-      });
+      setResumeError("");
+
+      let res;
+      if (resumeFile) {
+        // Uploaded resume: sent as multipart; the backend extracts the text
+        // and feeds it into the same analysis pipeline as pasted text.
+        const formData = new FormData();
+        formData.append("resumeFile", resumeFile);
+        formData.append("selfDescription", selfDescription);
+        formData.append("jobDescription", jobDescription);
+        res = await API.post("/interview/generate", formData);
+      } else {
+        res = await API.post("/interview/generate", {
+          resume,
+          selfDescription,
+          jobDescription,
+        });
+      }
 
       setReport(res.data);
       fetchHistory();
     } catch (error) {
       console.log(error);
-      alert("Failed to generate report");
+      const message = error.response?.data?.message;
+      // Resume problems (bad/empty/scanned file) show next to the resume field.
+      if (resumeFile && error.response && error.response.status !== 500 && message !== "Job Description is required") {
+        setResumeError(message);
+      } else {
+        alert(message || "Failed to generate report");
+      }
     } finally {
       setLoading(false);
     }
@@ -95,7 +117,7 @@ function Dashboard() {
           <span className="text-gradient"> interview-ready plan.</span>
         </h1>
         <p className="mt-3 max-w-2xl text-ink-faint">
-          Paste your resume, a short self description, and the job you're targeting.
+          Upload or paste your resume, add a short self description, and the job you're targeting.
           Rovue scores the fit and builds your questions, gaps, and prep plan.
         </p>
       </section>
@@ -103,14 +125,16 @@ function Dashboard() {
       {/* Inputs */}
       <section className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="p-6 animate-slideUp" style={{ animationDelay: "0ms" }}>
-          <Textarea
-            label="Resume"
-            icon={FiFileText}
-            placeholder="Paste your resume here"
-            rows={12}
-            maxLength={8000}
-            value={resume}
-            onChange={(e) => setResume(e.target.value)}
+          <ResumeInput
+            resume={resume}
+            onResumeChange={setResume}
+            file={resumeFile}
+            onFileChange={(f) => {
+              setResumeFile(f);
+              setResumeError("");
+            }}
+            loading={loading}
+            serverError={resumeError}
           />
         </Card>
 

@@ -1,14 +1,22 @@
 import reportsModel from "../models/reports.model.js";
 import genrateInterviewReport from "../services/ai.services.js";
+import { extractResumeText, ResumeParseError } from "../services/resumeParser.service.js";
 
 async function createInterviewReport(req, res) {
   try {
-    const { resume, selfDescription, jobDescription } = req.body;
+    const { selfDescription, jobDescription } = req.body;
+    let resume = req.body.resume;
 
     if (!jobDescription) {
       return res.status(400).json({
         message: "Job Description is required",
       });
+    }
+
+    // An uploaded file (PDF/DOCX) is converted to text and then flows through
+    // the exact same pipeline as pasted resume text.
+    if (req.file) {
+      resume = await extractResumeText(req.file);
     }
 
     const report = await genrateInterviewReport({
@@ -24,6 +32,9 @@ async function createInterviewReport(req, res) {
     
     return res.status(200).json(report);
   } catch (error) {
+    if (error instanceof ResumeParseError) {
+      return res.status(error.status).json({ message: error.message });
+    }
     console.log(error);
 
     return res.status(500).json({
